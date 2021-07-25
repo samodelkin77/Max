@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Author">
+    <title>#[[$Title$]]#</title>
+
+    <script type="text/javascript">
+        let Level = 1;
+        let TotalLevels = 9;
+        let elevatorMoving = 0;
+
+        function debug (msg) {
+            document.getElementById ("debug").innerHTML = msg;
+        }
+
+        function getLabel (n){
+            return document.getElementById("level_" + n);
+        }
+
+        function getButton (n){
+            return document.getElementById("button_" + n);
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function setLevel (level){
+            // alert (level);
+            for (let i = 1; i <= TotalLevels; i++){
+                let label = getLabel (i);
+                if (i == level) {
+                    label.setAttribute ("class", "ActiveLabel");
+                } else {
+                    label.setAttribute ("class", "InactiveLabel");
+                }
+            }
+            Level = level;
+            // debug (Level);
+        }
+
+        function createLevelLabels(){
+            // var d = document.createElement("div");
+            // d.innerHTML = "asdasdsadsadas";
+            var table = document.createElement ("table");
+            var row = table.insertRow (0);
+            document.body.appendChild (table);
+            for (let i = 1; i <= TotalLevels; i++) {
+                var cell = row.insertCell();
+                var div = document.createElement("div");
+                div.id = "level_" + i;
+                div.innerHTML = i;
+                cell.appendChild(div);
+            }
+            setLevel (Level);
+        }
+
+        function createButtons() {
+            var table = document.createElement ("table");
+            table.align = "right";
+            // for (let i = TotalLevels; i >= 1; i--) {
+            //     var row = table.insertRow (-1);
+            //     var cell = row.insertCell();
+            //     var button = document.createElement("button");
+            //     button.id = "button_" + i;
+            //     button.innerHTML = i;
+            //     button.onclick = function(){
+            //         changeTheLevel(i);
+            //     }       
+
+            for (let i = TotalLevels; i >= 1; i--) {
+                if (i == TotalLevels || i % 2 == 0) {
+                    var row = table.insertRow (-1);
+                }
+                var cell = row.insertCell();
+                var button = document.createElement("button");
+                button.id = "button_" + i;
+                button.innerHTML = i;
+                button.setAttribute ("class", "InactiveButton");
+                button.onclick = function(){
+                    changeTheLevel(i);
+            }       
+
+                cell.appendChild(button);
+            }
+            document.body.appendChild (table);
+        }
+
+        function creElements() {
+            createLevelLabels();
+            createButtons();
+            document.addEventListener ("keypress", keyPress);
+        }
+
+        async function changeTheLevel(newLevel){
+            if (newLevel != Level && elevatorMoving == 0) {
+                elevatorMoving = 1;
+                getButton (Level).setAttribute ("class", "InactiveButton");
+                getButton (newLevel).setAttribute ("class", "ActiveButton");
+
+                var audio = new Audio('Elevator-door-opening.mp3');
+                audio.play();   
+                increment = Math.sign(newLevel - Level);
+                for (let l = Level; l != newLevel + increment; l = l + increment) {
+                    await sleep (1000);
+                    setLevel (l);
+                }
+                audio.pause();
+                var audio = new Audio('Elevator-door-opening-with-a-bell.mp3');
+                audio.play();
+                elevatorMoving = 0;
+            }
+        }
+
+        function keyPress (e) {
+            changeTheLevel (e.keyCode - 48);
+        }
+
+
+
+    </script>
+
+
+
+     <style>
+         /* div {background-color: white; color: black;} */
+         button {height: 75px; width: 75px; font-size: 65px; text-align: center; border-radius: 50%; display:block;}
+
+        .ActiveButton {
+            background-color: yellow;
+        } 
+
+        .InactiveButton {
+            background-color: gray;
+        } 
+
+        .ActiveLabel {
+            font-size:150px; 
+            color: Yellow;
+        }
+        .InactiveLabel {
+            font-size:150px; 
+            color: Black;
+         }
+     </style>
+</head>
+
+<body onload="creElements()">
+
+</body>
+
+</html>
